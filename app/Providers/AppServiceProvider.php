@@ -27,5 +27,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         Gate::policy(Student::class, StudentPolicy::class);
+        Gate::policy(\App\Models\Enrollment::class, \App\Policies\EnrollmentPolicy::class);
+        Gate::policy(\App\Models\Grade::class, \App\Policies\GradePolicy::class);
     }
 }
