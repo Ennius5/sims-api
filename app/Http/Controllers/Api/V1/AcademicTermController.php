@@ -18,7 +18,7 @@ class AcademicTermController extends Controller
     {
         $academicTerms = QueryBuilder::for(AcademicTerm::class)
             ->allowedFilters(['status', AllowedFilter::partial('search', 'name')])
-            ->allowedSorts(['academic_year', 'semester','status', 'created_at'])
+            ->allowedSorts(['academic_year', 'semester','status', 'start_date', 'end_date'])
             ->paginate(request('per_page', 20));
 
         return $this->success(AcademicTermResource::collection($academicTerms)->response()->getData(true), 'Academic terms retrieved successfully.');
