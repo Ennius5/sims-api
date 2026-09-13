@@ -20,17 +20,18 @@ class EnrollmentController extends Controller
     {
         $user = $request->user();
 
-        $query = QueryBuilder::for(Enrollment::class)
-            ->with(['student', 'courseOffering.course', 'grade'])
-            ->allowedFilters(['student_id', 'course_offering_id', 'status']);
+    $query = QueryBuilder::for(Enrollment::class)
+        ->with(['student', 'courseOffering.course', 'grade'])
+        ->allowedFilters(['student_id', 'course_offering_id', 'status'])
+        ->allowedSorts(['enrollment_date', 'created_at']);
 
         if ($user->hasRole('student')) {
             $query->where('student_id', $user->student?->id);
         } elseif ($user->hasRole('instructor')) {
             $query->whereHas('courseOffering', fn ($q) => $q->where('instructor_id', $user->id));
         }
-
-        $enrollments = $query->paginate(request('per_page', 20));
+        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
+        $enrollments = $query->paginate($perPage);
 
         return $this->success(EnrollmentResource::collection($enrollments)->response()->getData(true), 'Enrollments retrieved successfully.');
     }

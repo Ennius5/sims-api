@@ -16,10 +16,11 @@ class CourseController extends Controller
 
     public function index()
     {
+        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
         $courses = QueryBuilder::for(Course::class)
             ->allowedFilters(['status', AllowedFilter::partial('search', 'course_title')])
             ->allowedSorts(['course_title', 'course_code', 'created_at'])
-            ->paginate(request('per_page', 20));
+            ->paginate($perPage);
 
         return $this->success(CourseResource::collection($courses)->response()->getData(true), 'Courses retrieved successfully.');
     }

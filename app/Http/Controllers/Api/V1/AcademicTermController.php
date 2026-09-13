@@ -16,10 +16,11 @@ class AcademicTermController extends Controller
 
     public function index()
     {
+        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
         $academicTerms = QueryBuilder::for(AcademicTerm::class)
             ->allowedFilters(['status', AllowedFilter::partial('search', 'name')])
             ->allowedSorts(['academic_year', 'semester','status', 'start_date', 'end_date'])
-            ->paginate(request('per_page', 20));
+            ->paginate($perPage);
 
         return $this->success(AcademicTermResource::collection($academicTerms)->response()->getData(true), 'Academic terms retrieved successfully.');
     }

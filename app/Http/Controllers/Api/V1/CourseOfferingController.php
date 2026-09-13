@@ -53,7 +53,8 @@ class CourseOfferingController extends Controller
 
     public function students(CourseOffering $courseOffering)
     {
-        $students = $courseOffering->enrollments()->with('student.program')->paginate(request('per_page', 20));
+        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
+        $students = $courseOffering->enrollments()->with('student.program')->paginate($perPage);
 
         return $this->success($students, 'Enrolled students retrieved successfully.');
     }

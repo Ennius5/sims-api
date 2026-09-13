@@ -16,10 +16,11 @@ class ProgramController extends Controller
 
     public function index()
     {
+        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
         $programs = QueryBuilder::for(Program::class)
             ->allowedFilters(['status', AllowedFilter::partial('search', 'name')])
             ->allowedSorts(['name', 'code', 'created_at'])
-            ->paginate(request('per_page', 20));
+            ->paginate($perPage);
 
         return $this->success(ProgramResource::collection($programs)->response()->getData(true), 'Programs retrieved successfully.');
     }
