@@ -16,9 +16,18 @@ class ProgramController extends Controller
 
     public function index()
     {
-        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
+        $perPage = min((int) request('per_page', 20), 100);
+
         $programs = QueryBuilder::for(Program::class)
-            ->allowedFilters(['status', AllowedFilter::partial('search', 'name')])
+            ->allowedFilters([
+                'status',
+                AllowedFilter::callback('search', function ($query, $value) {
+                    $query->where(function ($q) use ($value) {
+                        $q->where('name', 'like', "%{$value}%")
+                        ->orWhere('code', 'like', "%{$value}%");
+                    });
+                }),
+            ])
             ->allowedSorts(['name', 'code', 'created_at'])
             ->paginate($perPage);
 

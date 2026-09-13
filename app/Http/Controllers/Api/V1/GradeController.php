@@ -44,11 +44,12 @@ class GradeController extends Controller
 
     public function indexForStudent(\App\Models\Student $student)
     {
-        $this->authorize('view', $student); // same rule — student sees own, admin/registrar see all, instructor blocked unless extended
-        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
+        $this->authorize('view', $student);
+
+        $perPage = min((int) request('per_page', 20), 100);
+
         $grades = \App\Models\Grade::whereHas('enrollment', fn ($q) => $q->where('student_id', $student->id))
             ->with('enrollment.courseOffering.course')
-
             ->paginate($perPage);
 
         return $this->success(GradeResource::collection($grades)->response()->getData(true), 'Student grades retrieved successfully.');

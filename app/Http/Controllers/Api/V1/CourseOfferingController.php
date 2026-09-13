@@ -14,16 +14,30 @@ class CourseOfferingController extends Controller
 {
     use ApiResponse;
 
-    public function index()
-    {
-        $offerings = QueryBuilder::for(CourseOffering::class)
-            ->with(['course', 'academicTerm', 'instructor'])
-            ->allowedFilters(['course_id', 'academic_term_id', 'instructor_id', 'status'])
-            ->allowedSorts(['section', 'created_at'])
-            ->paginate(request('per_page', 20));
+public function index()
+{
+    $perPage = min((int) request('per_page', 20), 100);
 
-        return $this->success(CourseOfferingResource::collection($offerings)->response()->getData(true), 'Course offerings retrieved successfully.');
-    }
+    $offerings = QueryBuilder::for(CourseOffering::class)
+        ->with(['course', 'academicTerm', 'instructor'])
+        ->allowedFilters([
+            'course_id',
+            'academic_term_id',
+            'instructor_id',
+            'status',
+            AllowedFilter::callback('search', function ($query, $value) {
+                $query->where('section', 'like', "%{$value}%")
+                    ->orWhereHas('course', function ($q) use ($value) {
+                        $q->where('course_code', 'like', "%{$value}%")
+                          ->orWhere('course_title', 'like', "%{$value}%");
+                    });
+            }),
+        ])
+        ->allowedSorts(['section', 'created_at'])
+        ->paginate($perPage);
+
+    return $this->success(CourseOfferingResource::collection($offerings)->response()->getData(true), 'Course offerings retrieved successfully.');
+}
 
     public function store(CourseOfferingRequest $request)
     {

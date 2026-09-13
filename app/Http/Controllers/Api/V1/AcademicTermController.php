@@ -14,16 +14,25 @@ class AcademicTermController extends Controller
 {
     use ApiResponse;
 
-    public function index()
-    {
-        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
-        $academicTerms = QueryBuilder::for(AcademicTerm::class)
-            ->allowedFilters(['status', AllowedFilter::partial('search', 'name')])
-            ->allowedSorts(['academic_year', 'semester','status', 'start_date', 'end_date'])
-            ->paginate($perPage);
+public function index()
+{
+    $perPage = min((int) request('per_page', 20), 100);
 
-        return $this->success(AcademicTermResource::collection($academicTerms)->response()->getData(true), 'Academic terms retrieved successfully.');
-    }
+    $terms = QueryBuilder::for(AcademicTerm::class)
+        ->allowedFilters([
+            'status',
+            AllowedFilter::callback('search', function ($query, $value) {
+                $query->where(function ($q) use ($value) {
+                    $q->where('academic_year', 'like', "%{$value}%")
+                      ->orWhere('semester', 'like', "%{$value}%");
+                });
+            }),
+        ])
+        ->allowedSorts(['academic_year', 'start_date', 'created_at'])
+        ->paginate($perPage);
+
+    return $this->success(AcademicTermResource::collection($terms)->response()->getData(true), 'Academic terms retrieved successfully.');
+}
 
     public function store(AcademicTermRequest $request)
     {

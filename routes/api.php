@@ -24,14 +24,14 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('programs', ProgramController::class);
             Route::apiResource('courses', CourseController::class);
             Route::apiResource('academic-terms', AcademicTermController::class);
+            Route::apiResource('course-offerings', CourseOfferingController::class);
+            Route::get('/course-offerings/{courseOffering}/students', [CourseOfferingController::class, 'students']);
             });
 
         Route::apiResource('students', StudentController::class);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
 
-        Route::apiResource('course-offerings', CourseOfferingController::class);
-        Route::get('/course-offerings/{courseOffering}/students', [CourseOfferingController::class, 'students']);
 
         Route::apiResource('enrollments', EnrollmentController::class)->except(['update']); // spec allows GET/PATCH/DELETE — using apiResource->only if you prefer
         Route::patch('/enrollments/{enrollment}', [EnrollmentController::class, 'update']);

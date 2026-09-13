@@ -19,18 +19,19 @@ class EnrollmentController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        $perPage = min((int) request('per_page', 20), 100);
 
-    $query = QueryBuilder::for(Enrollment::class)
-        ->with(['student', 'courseOffering.course', 'grade'])
-        ->allowedFilters(['student_id', 'course_offering_id', 'status'])
-        ->allowedSorts(['enrollment_date', 'created_at']);
+        $query = QueryBuilder::for(Enrollment::class)
+            ->with(['student', 'courseOffering.course', 'grade'])
+            ->allowedFilters(['student_id', 'course_offering_id', 'status'])
+            ->allowedSorts(['enrollment_date', 'created_at']);
 
         if ($user->hasRole('student')) {
             $query->where('student_id', $user->student?->id);
         } elseif ($user->hasRole('instructor')) {
             $query->whereHas('courseOffering', fn ($q) => $q->where('instructor_id', $user->id));
         }
-        $perPage = min(request('per_page', 20), 100); // Limit the maximum per page to 100
+
         $enrollments = $query->paginate($perPage);
 
         return $this->success(EnrollmentResource::collection($enrollments)->response()->getData(true), 'Enrollments retrieved successfully.');
@@ -72,11 +73,13 @@ class EnrollmentController extends Controller
 
     public function indexForStudent(\App\Models\Student $student)
     {
-        $this->authorize('view', $student); // reuse StudentPolicy — same access rule as viewing the student directly
+        $this->authorize('view', $student);
+
+        $perPage = min((int) request('per_page', 20), 100);
 
         $enrollments = $student->enrollments()
             ->with(['courseOffering.course', 'courseOffering.academicTerm', 'grade'])
-            ->paginate(request('per_page', 20));
+            ->paginate($perPage);
 
         return $this->success(EnrollmentResource::collection($enrollments)->response()->getData(true), 'Student enrollments retrieved successfully.');
     }

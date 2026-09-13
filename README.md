@@ -1,59 +1,146 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Student Information Management REST API (SIMS API)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend-only REST API for managing student records, academic programs, courses, terms, course offerings, enrollments, and grades — built for the AI-Assisted Framework-Based REST API Development laboratory activity.
 
-## About Laravel
+## Tech Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Framework:** Laravel 12 (PHP 8.2)
+- **Auth:** Laravel Sanctum (token-based)
+- **Roles/Permissions:** spatie/laravel-permission
+- **Search/Filter/Sort/Pagination:** spatie/laravel-query-builder
+- **API Docs:** dedoc/scramble (OpenAPI/Swagger)
+- **Testing:** Pest (+ pest-plugin-laravel)
+- **Database:** MySQL (via XAMPP for local development)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Prerequisites
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Composer
+- MySQL (XAMPP or standalone)
+- Postman, Insomnia, or equivalent API client
 
-## Learning Laravel
+## Installation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+git clone <repo-url>
+cd sims-api
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Environment Configuration
 
-## Laravel Sponsors
+Edit `.env` with your local database credentials:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```
+APP_ENV=local
+APP_PORT=8000
 
-### Premium Partners
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sims_api
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Database Setup
 
-## Contributing
+Create the database (via phpMyAdmin or CLI):
+```bash
+mysql -u root -e "CREATE DATABASE sims_api"
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Migrations & Seeding
 
-## Code of Conduct
+```bash
+php artisan migrate:fresh --seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+This runs all migrations and seeds:
+- 4 roles: `administrator`, `registrar`, `instructor`, `student`
+- 5 demo user accounts (see **Authentication** below)
+- 3 academic programs (BSIT, BSCS, BSIS)
+- 100 students
+- 20 courses
+- 2 academic terms
+- 20 course offerings
+- 200 enrollments
+- 100 grades
 
-## Security Vulnerabilities
+## Running the API
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan serve
+```
 
-## License
+API base URL: `http://localhost:8000/api/v1`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Authentication
+
+All endpoints except `POST /auth/login` require a Bearer token, obtained via login.
+
+**Demo accounts** (all use password `password`):
+
+| Role | Email |
+|---|---|
+| Administrator | admin@sims.test |
+| Registrar | registrar@sims.test |
+| Instructor | instructor1@sims.test |
+| Instructor | instructor2@sims.test |
+| Student | student1@sims.test |
+
+Login:
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@sims.test","password":"password"}'
+```
+
+Response includes a `data.token` — pass it as `Authorization: Bearer <token>` on subsequent requests.
+
+Get current user: `GET /api/v1/auth/me`
+Logout (revoke token): `POST /api/v1/auth/logout`
+
+## API Documentation
+
+Interactive OpenAPI/Swagger docs (via Scramble), available once the server is running:
+```
+http://localhost:8000/docs/api
+```
+
+A full manual endpoint reference (with example requests/responses for every route) is also included in this repo — see `docs/endpoint-reference.md`.
+
+## API Client Collection
+
+A Postman collection and environment are included:
+- `postman/SIMS-API.postman_collection.json`
+- `postman/SIMS-Local.postman_environment.json`
+
+Import both into Postman, select the `SIMS Local` environment, and run the collection via the Collection Runner to execute the full request suite (success and failure cases for every resource group).
+
+## Running Tests
+
+```bash
+php artisan test
+```
+
+Covers authentication, student CRUD/validation, authorization (role and object-level), enrollment duplicate-prevention, grade authorization, and collection search/filter/sort/pagination.
+
+## Entity Relationship Diagram
+
+See `docs/ERD.md` — Mermaid-format ERD covering all 8 core tables, relationships, and unique constraints.
+
+## AI-Assisted Development Summary
+
+This project was built with AI assistance (Claude) used for: architecture and package selection, migration/model/controller/policy scaffolding, debugging (including several real issues: Windows Defender file-lock during Composer installs, incorrect route-group nesting causing unintended public/role-restricted endpoints, seeder ordering causing role-dependent factory failures, and a missing Eloquent relationship causing object-level authorization to silently fail), and documentation drafting.
+
+Every AI-generated suggestion was manually reviewed, tested via `php artisan route:list -v`, Tinker, and Postman before being accepted, and multiple bugs surfaced during that verification process were traced to their root cause and fixed rather than worked around (e.g. the `students` routes briefly inheriting an unintended `role:administrator|registrar` middleware group; several endpoints briefly running outside the `auth:sanctum` group entirely). The developer can explain and modify all architecture, security, and business-logic decisions in this codebase.
+
+## Project Structure Notes
+
+- All API controllers live under `app/Http/Controllers/Api/V1/`
+- Authorization is enforced via a mix of route-level role middleware (Programs/Courses/Academic Terms — admin/registrar only) and model Policies (Students, Enrollments, Grades — supports finer-grained, object-level rules like "a student may only view their own record")
+- All list endpoints support `search`, relevant `filter[...]` fields, `sort`, and `per_page` (capped at 100) via `spatie/laravel-query-builder`
+- All API responses follow a consistent `{success, message, data}` / `{success, message, errors}` shape, including for framework-level exceptions (401/403/404/422/400) via custom exception rendering in `bootstrap/app.php`
