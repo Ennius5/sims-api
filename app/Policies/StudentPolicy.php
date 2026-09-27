@@ -12,15 +12,20 @@ class StudentPolicy
         return $user->hasAnyRole(['administrator', 'registrar', 'instructor']) || $user->hasRole('student');
     }
 
-    public function view(User $user, Student $student): bool
-    {
-        if ($user->hasAnyRole(['administrator', 'registrar'])) {
-            return true;
-        }
-
-        return $user->hasRole('student') && $user->student?->id === $student->id;
+public function view(User $user, Student $student): bool
+{
+    if ($user->hasAnyRole(['administrator', 'registrar'])) {
+        return true;
     }
 
+    if ($user->hasRole('instructor')) {
+        return $student->enrollments()
+            ->whereHas('courseOffering', fn ($q) => $q->where('instructor_id', $user->id))
+            ->exists();
+    }
+
+    return $user->hasRole('student') && $user->student?->id === $student->id;
+}
     public function create(User $user): bool
     {
         return $user->hasAnyRole(['administrator', 'registrar']);

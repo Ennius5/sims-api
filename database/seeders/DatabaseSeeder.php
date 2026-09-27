@@ -34,7 +34,19 @@ class DatabaseSeeder extends Seeder
         Student::inRandomOrder()->first()?->update(['user_id' => $studentUser->id]);
 
         \App\Models\Course::factory(20)->create();
-        \App\Models\AcademicTerm::factory(2)->create();
+        \App\Models\AcademicTerm::factory()->create([
+            'academic_year' => '2026-2027',
+            'semester' => '1st',
+            'start_date' => '2026-08-01',
+            'end_date' => '2026-12-15',
+        ]);
+
+        \App\Models\AcademicTerm::factory()->create([
+            'academic_year' => '2026-2027',
+            'semester' => '2nd',
+            'start_date' => '2027-01-01',
+            'end_date' => '2027-05-15',
+        ]);
 
         $courseIds = \App\Models\Course::pluck('id');
         $termIds = \App\Models\AcademicTerm::pluck('id');

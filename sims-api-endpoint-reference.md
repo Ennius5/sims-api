@@ -343,6 +343,26 @@ Success `200` — response shape:
 
 ---
 
+## Instructors
+Auth: any authenticated user (read-only lookup, no role restriction).
+
+### List
+GET {{base_url}}/instructors
+
+Returns all users with the `instructor` role and `status: ACTIVE`, ordered by name. Intended for populating instructor dropdowns when creating/editing a Course Offering.
+
+Success `200`:
+```json
+{
+  "success": true,
+  "message": "Instructors retrieved successfully.",
+  "data": [
+    { "id": 3, "name": "Juan Dela Cruz", "email": "instructor1@sims.test" },
+    { "id": 4, "name": "Maria Santos", "email": "instructor2@sims.test" }
+  ]
+}
+```
+
 ## Quick reference: expected status codes to demo per resource
 
 | Scenario | Status |

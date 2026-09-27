@@ -16,11 +16,13 @@ class StudentController extends Controller
     use ApiResponse;
     use AuthorizesRequests;
 
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
         $this->authorize('viewAny', Student::class);
 
-        $students = QueryBuilder::for(Student::class)
+        $user = $request->user();
+
+        $query = QueryBuilder::for(Student::class)
             ->with('program')
             ->allowedFilters([
                 'program_id',
@@ -29,17 +31,21 @@ class StudentController extends Controller
                 AllowedFilter::callback('search', function ($query, $value) {
                     $query->where(function ($q) use ($value) {
                         $q->where('first_name', 'like', "%{$value}%")
-                          ->orWhere('last_name', 'like', "%{$value}%")
-                          ->orWhere('student_number', 'like', "%{$value}%");
+                        ->orWhere('last_name', 'like', "%{$value}%")
+                        ->orWhere('student_number', 'like', "%{$value}%");
                     });
                 }),
             ])
-            ->allowedSorts(['last_name', 'first_name', 'student_number', 'created_at'])
-            ->paginate(request('per_page', 20));
+            ->allowedSorts(['last_name', 'first_name', 'student_number', 'created_at']);
+
+        if ($user->hasRole('student')) {
+            $query->where('id', $user->student?->id);
+        }
+
+        $students = $query->paginate(min((int) request('per_page', 20), 100));
 
         return $this->success(StudentResource::collection($students)->response()->getData(true), 'Students retrieved successfully.');
     }
-
     public function store(StudentRequest $request)
     {
         $this->authorize('create', Student::class);

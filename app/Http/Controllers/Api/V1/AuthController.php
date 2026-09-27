@@ -36,6 +36,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->getRoleNames(),
+                'student_id' => $user->student?->id,
             ],
             'token' => $token,
         ], 'Login successful.');
@@ -57,6 +58,7 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'roles' => $user->getRoleNames(),
+            'student_id' => $user->student?->id,
         ], 'Current user retrieved.');
     }
 }

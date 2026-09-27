@@ -13,13 +13,25 @@ class EnrollmentRequest extends FormRequest
         return true;
     }
 
+    // public function rules(): array
+    // {
+    //     return [
+    //         'student_id' => ['required', 'exists:students,id'],
+    //         'course_offering_id' => ['required', 'exists:course_offerings,id'],
+    //         'enrollment_date' => ['required', 'date'],
+    //         'status' => ['sometimes', Rule::in(['ENROLLED', 'DROPPED', 'COMPLETED'])],
+    //     ];
+    // }
+
     public function rules(): array
     {
+        $isUpdate = $this->isMethod('PATCH') || $this->isMethod('PUT');
+
         return [
-            'student_id' => ['required', 'exists:students,id'],
-            'course_offering_id' => ['required', 'exists:course_offerings,id'],
-            'enrollment_date' => ['required', 'date'],
-            'status' => ['sometimes', Rule::in(['ENROLLED', 'DROPPED', 'COMPLETED'])],
+            'student_id' => [$isUpdate ? 'sometimes' : 'required', 'exists:students,id'],
+            'course_offering_id' => [$isUpdate ? 'sometimes' : 'required', 'exists:course_offerings,id'],
+            'enrollment_date' => [$isUpdate ? 'sometimes' : 'required', 'date'],
+            'status' => [$isUpdate ? 'sometimes' : 'required', Rule::in(['ENROLLED', 'DROPPED', 'COMPLETED'])],
         ];
     }
 

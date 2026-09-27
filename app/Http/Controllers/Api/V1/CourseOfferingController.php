@@ -9,10 +9,13 @@ use App\Http\Traits\ApiResponse;
 use App\Models\CourseOffering;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class CourseOfferingController extends Controller
 {
     use ApiResponse;
+    use AuthorizesRequests;
 
 public function index()
 {
@@ -41,6 +44,8 @@ public function index()
 
     public function store(CourseOfferingRequest $request)
     {
+        $this->authorize('create', CourseOffering::class);
+
         $offering = CourseOffering::create($request->validated());
 
         return $this->success(new CourseOfferingResource($offering->load(['course', 'academicTerm', 'instructor'])), 'Course offering created successfully.', 201);
@@ -53,17 +58,20 @@ public function index()
 
     public function update(CourseOfferingRequest $request, CourseOffering $courseOffering)
     {
+        $this->authorize('update', $courseOffering);
+
         $courseOffering->update($request->validated());
 
         return $this->success(new CourseOfferingResource($courseOffering->load(['course', 'academicTerm', 'instructor'])), 'Course offering updated successfully.');
     }
+public function destroy(CourseOffering $courseOffering)
+{
+    $this->authorize('delete', $courseOffering);
 
-    public function destroy(CourseOffering $courseOffering)
-    {
-        $courseOffering->delete();
+    $courseOffering->delete();
 
-        return $this->success(null, 'Course offering deleted successfully.');
-    }
+    return $this->success(null, 'Course offering deleted successfully.');
+}
 
     public function students(CourseOffering $courseOffering)
     {

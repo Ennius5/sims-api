@@ -13,7 +13,8 @@ use App\Http\Controllers\Api\V1\AcademicRecordController;
 use App\Http\Controllers\Api\V1\CourseOfferingController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\GradeController;
-
+use App\Http\Controllers\Api\V1\InstructorController;
+use App\Http\Controllers\Api\V1\UserController;
 
 Route::prefix('v1')->group(function () {
 
@@ -24,10 +25,12 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('programs', ProgramController::class);
             Route::apiResource('courses', CourseController::class);
             Route::apiResource('academic-terms', AcademicTermController::class);
-            Route::apiResource('course-offerings', CourseOfferingController::class);
-            Route::get('/course-offerings/{courseOffering}/students', [CourseOfferingController::class, 'students']);
+            Route::get('/users', [UserController::class, 'index']);
             });
 
+        Route::get('/course-offerings/{courseOffering}/students', [CourseOfferingController::class, 'students']);
+        Route::apiResource('course-offerings', CourseOfferingController::class);
+        Route::get('/instructors', [InstructorController::class, 'index']);
         Route::apiResource('students', StudentController::class);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::get('/auth/me', [AuthController::class, 'me']);
