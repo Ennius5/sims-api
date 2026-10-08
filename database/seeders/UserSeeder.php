@@ -40,5 +40,19 @@ class UserSeeder extends Seeder
             ['name' => 'Pedro Reyes', 'password' => Hash::make('password')]
         );
         $studentUser->assignRole('student');
+
+                $studentUser = User::firstOrCreate(
+            ['email' => 'student2@sims.test'],
+            ['name' => 'Ronaldo Montes', 'password' => Hash::make('password')]
+        );
+        $studentUser->assignRole('student');
+
+                $studentUser = User::firstOrCreate(
+            ['email' => 'student3@sims.test'],
+            ['name' => 'Inigo Morales', 'password' => Hash::make('password')]
+        );
+        $studentUser->assignRole('student');
     }
+
+
 }

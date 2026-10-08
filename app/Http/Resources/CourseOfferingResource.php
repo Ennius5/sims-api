@@ -24,6 +24,7 @@ class CourseOfferingResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'enrolled_count' => $this->enrollments_count
         ];
     }
 }

@@ -23,18 +23,19 @@ public function index()
 
     $offerings = QueryBuilder::for(CourseOffering::class)
         ->with(['course', 'academicTerm', 'instructor'])
-        ->allowedFilters([
-            'course_id',
-            'academic_term_id',
-            'instructor_id',
-            'status',
-            AllowedFilter::callback('search', function ($query, $value) {
-                $query->where('section', 'like', "%{$value}%")
-                    ->orWhereHas('course', function ($q) use ($value) {
-                        $q->where('course_code', 'like', "%{$value}%")
-                          ->orWhere('course_title', 'like', "%{$value}%");
-                    });
-            }),
+        ->withCount('enrollments')
+            ->allowedFilters([
+                AllowedFilter::exact('course_id'),
+                AllowedFilter::exact('academic_term_id'),
+                AllowedFilter::exact('instructor_id'),
+                AllowedFilter::exact('status'),
+                AllowedFilter::callback('search', function ($query, $value) {
+                    $query->where('section', 'like', "%{$value}%")
+                        ->orWhereHas('course', function ($q) use ($value) {
+                            $q->where('course_code', 'like', "%{$value}%")
+                            ->orWhere('course_title', 'like', "%{$value}%");
+                        });
+                }),
         ])
         ->allowedSorts(['section', 'created_at'])
         ->paginate($perPage);

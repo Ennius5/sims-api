@@ -10,6 +10,7 @@ use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Spatie\QueryBuilder\AllowedFilter;
 
 class EnrollmentController extends Controller
 {
@@ -23,7 +24,11 @@ class EnrollmentController extends Controller
 
         $query = QueryBuilder::for(Enrollment::class)
             ->with(['student', 'courseOffering.course', 'grade'])
-            ->allowedFilters(['student_id', 'course_offering_id', 'status'])
+            ->allowedFilters([
+                AllowedFilter::exact('student_id'),
+                AllowedFilter::exact('course_offering_id'),
+                AllowedFilter::exact('status'),
+])
             ->allowedSorts(['enrollment_date', 'created_at']);
 
         if ($user->hasRole('student')) {

@@ -31,7 +31,7 @@ class EnrollmentRequest extends FormRequest
             'student_id' => [$isUpdate ? 'sometimes' : 'required', 'exists:students,id'],
             'course_offering_id' => [$isUpdate ? 'sometimes' : 'required', 'exists:course_offerings,id'],
             'enrollment_date' => [$isUpdate ? 'sometimes' : 'required', 'date'],
-            'status' => [$isUpdate ? 'sometimes' : 'required', Rule::in(['ENROLLED', 'DROPPED', 'COMPLETED'])],
+            'status' => ['sometimes', Rule::in(['ENROLLED', 'DROPPED', 'COMPLETED'])],
         ];
     }
 
